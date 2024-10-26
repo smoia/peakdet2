@@ -5,21 +5,28 @@ Helper class for holding physiological data and associated metadata information
 import tkinter as tk
 from tkinter import ttk
 
+import matplotlib.pyplot as plt
+from darkdetect import theme
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from sv_ttk import set_theme
+
 from peakdet import __version__
 
 
 class Window:
     def __init__(self, master):
 
+        # Temporary channel for preview
+        channel_list = ["Channel 1", "Channel 2", "Channel 3"]
+
         # Style
-        s = ttk.Style()
-        s.theme_use("alt")
+        set_theme(theme())
 
         # Make title
         frame_title = ttk.Frame(master)
-        frame_title.grid(row=0, column=0, columnspan=2, pady=(10, 5))
+        frame_title.grid(row=0, column=0, columnspan=2, sticky="n", pady=(10, 5))
         label = ttk.Label(frame_title, text="Name of file")
-        label.pack()
+        label.grid(row=0, column=0)
 
         # Initialize a variable to interact with the plot
         interaction = tk.IntVar()
@@ -32,12 +39,21 @@ class Window:
         frame_peakdetvar = ttk.LabelFrame(left_column, text="Peak detection parameters")
         frame_peakdetvar.grid(row=0, column=0, sticky="ew", padx=3, pady=5)
 
-        thresh = ttk.Entry(frame_peakdetvar)
-        thresh.insert(0, "Threshold [0,1]")
-        thresh.grid(row=0, column=0, padx=5, pady=3)
-        dist = ttk.Entry(frame_peakdetvar)
-        dist.insert(0, "Distance [0,inf)")
-        dist.grid(row=1, column=0, padx=5, pady=3)
+        label_thresh = ttk.Label(frame_peakdetvar, text="Threshold [0, 1]: ")
+        label_thresh.grid(row=0, column=0, sticky="nw", pady=3)
+        entry_thresh = ttk.Entry(frame_peakdetvar, width=5)
+        entry_thresh.insert(0, "0.2")
+        entry_thresh.grid(row=0, column=1, sticky="ne", pady=3)
+        label_dist = ttk.Label(frame_peakdetvar, text="Distance [0, inf): ")
+        label_dist.grid(row=1, column=0, sticky="w", pady=3)
+        entry_dist = ttk.Entry(frame_peakdetvar, width=5)
+        entry_dist.insert(0, "0")
+        entry_dist.grid(row=1, column=1, sticky="e", pady=3)
+        label_activechannel = ttk.Label(frame_peakdetvar, text="Channel: ")
+        label_activechannel.grid(row=2, column=0, sticky="se", pady=3)
+        box_activechannel = ttk.Combobox(frame_peakdetvar, values=channel_list)
+        box_activechannel.set("Active Channel")
+        box_activechannel.grid(row=2, column=1, sticky="sw", pady=3)
 
         # Menu for automatic peak detection
         frame_peakdet = ttk.Frame(left_column)
@@ -82,20 +98,25 @@ class Window:
         radio_rempeaks = ttk.Radiobutton(
             frame_movesignal, text="Manual realignment", variable=interaction, value=5
         )
-        radio_rempeaks.pack(padx=5, pady=3)
+        radio_rempeaks.grid(row=0, column=0, columnspan=2, sticky="ew", padx=5, pady=3)
 
-        channel_list = ["Channel 1", "Channel 2", "Channel 3"]
-        reference_channel = ttk.Combobox(frame_movesignal, values=channel_list)
-        reference_channel.set("Reference Channel")
-        reference_channel.pack(padx=5, pady=3)
-        moving_channel = ttk.Combobox(frame_movesignal, values=channel_list)
-        moving_channel.set("Moving Channel")
-        moving_channel.pack(padx=5, pady=3)
+        label_reference = ttk.Label(frame_movesignal, text="Reference: ")
+        label_reference.grid(row=1, column=0, sticky="e", pady=3)
+        box_referencechannel = ttk.Combobox(frame_movesignal, values=channel_list)
+        box_referencechannel.set("Reference Channel")
+        box_referencechannel.grid(row=1, column=1, sticky="w", pady=3)
+        label_moving = ttk.Label(frame_movesignal, text="Moving: ")
+        label_moving.grid(row=2, column=0, sticky="e", pady=3)
+        box_movingchannel = ttk.Combobox(frame_movesignal, values=channel_list)
+        box_movingchannel.set("Moving Channel")
+        box_movingchannel.grid(row=2, column=1, sticky="w", pady=3)
 
         button_realignsignal = ttk.Button(
             frame_movesignal, text="Run automatic realignment"
         )
-        button_realignsignal.pack(padx=5, pady=3)
+        button_realignsignal.grid(
+            row=3, column=0, columnspan=2, sticky="ew", padx=5, pady=3
+        )
 
         # Menu for plot interaction
         frame_plotinteraction = ttk.LabelFrame(left_column, text="Plot interaction")
@@ -111,7 +132,7 @@ class Window:
         radio_zoom.pack(padx=5, pady=3)
 
         # Plots!
-        rightframe = ttk.LabelFrame(left_column)
+        rightframe = ttk.Frame(master)
         rightframe.grid(row=1, column=1, sticky="ns", padx=5, pady=5)
 
 
