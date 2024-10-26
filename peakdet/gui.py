@@ -5,8 +5,6 @@ Helper class for holding physiological data and associated metadata information
 import tkinter as tk
 from tkinter import ttk
 
-from ttkthemes import ThemedStyle
-
 from peakdet import __version__
 
 
@@ -14,8 +12,8 @@ class Window:
     def __init__(self, master):
 
         # Style
-        s = ThemedStyle()
-        s.theme_use("yaru")
+        s = ttk.Style()
+        s.theme_use("alt")
 
         # Make title
         frame_title = ttk.Frame(master)
