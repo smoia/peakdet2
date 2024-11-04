@@ -30,6 +30,8 @@ class Window:
         # ## Style
         set_theme(theme())
 
+        # ######################## Menus ######################## #
+
         # ## Create menu
         master.option_add("*tearOff", tk.FALSE)
         menu_master = tk.Menu(master)
@@ -62,94 +64,89 @@ class Window:
         label = ttk.Label(frame_title, text="Name of file")
         label.grid(row=0, column=0)
 
+        # ######################## Left Frame ######################## #
+
         # ## Initialize a variable to interact with the plot
         interaction = tk.IntVar()
+        detect_opposite = tk.BooleanVar(value=False)
+        point_type = ["Peaks", "Troughs", "Zero cross", "1st Deriv", "2nd Deriv"]
 
         # ## Create a frame to hold all labelframes in a single column on the left
         left_column = ttk.Frame(master)
         left_column.grid(row=1, column=0, sticky="ns", padx=5, pady=5)
 
-        # Frame for setting peak detection parameters
-        frame_peakdetvar = ttk.LabelFrame(
-            left_column, text="Point detection parameters"
-        )
-        frame_peakdetvar.grid(row=0, column=0, sticky="ew", padx=3, pady=5)
-
-        label_thresh = ttk.Label(frame_peakdetvar, text="Threshold [0, 1]: ")
-        label_thresh.grid(row=0, column=0, sticky="nw", padx=(5, 1), pady=3)
-        entry_thresh = ttk.Entry(frame_peakdetvar, width=5)
-        entry_thresh.insert(0, "0.2")
-        entry_thresh.grid(row=0, column=1, sticky="ne", padx=(1, 5), pady=3)
-        label_dist = ttk.Label(frame_peakdetvar, text="Distance [0, inf): ")
-        label_dist.grid(row=1, column=0, sticky="w", padx=(5, 1), pady=3)
-        entry_dist = ttk.Entry(frame_peakdetvar, width=5)
-        entry_dist.insert(0, "0")
-        entry_dist.grid(row=1, column=1, sticky="e", padx=(1, 5), pady=3)
-        check_autodetect = ttk.Checkbutton(
-            frame_peakdetvar, text="Automatically detect opposite"
-        )
-        check_autodetect.grid(
-            row=2, column=0, columnspan=2, sticky="ew", padx=5, pady=3
-        )
-
-        # Frame for automatic peak detection
+        # Frame for all peak detection related
         frame_peakdet = ttk.LabelFrame(left_column, text="Point detection")
-        frame_peakdet.grid(row=1, column=0, sticky="ew", padx=3, pady=5)
+        frame_peakdet.grid(row=0, column=0, sticky="ew", padx=3, pady=5)
 
         label_activechannel = ttk.Label(frame_peakdet, text="Channel: ")
         label_activechannel.grid(row=0, column=0, sticky="se", padx=(5, 1), pady=3)
         box_activechannel = ttk.Combobox(frame_peakdet, values=channel_list)
         box_activechannel.set("Active Channel")
         box_activechannel.grid(row=0, column=1, sticky="sw", padx=(1, 5), pady=3)
-        button_runpeakdet = ttk.Button(frame_peakdet, text="Run peak detection")
-        button_runpeakdet.grid(row=1, column=0, columnspan=2, padx=5, pady=3)
-        button_runtroudet = ttk.Button(frame_peakdet, text="Run trough detection")
-        button_runtroudet.grid(row=2, column=0, columnspan=2, padx=5, pady=3)
+
+        label_pointtype = ttk.Label(frame_peakdet, text="Point: ")
+        label_pointtype.grid(row=1, column=0, sticky="se", padx=(5, 1), pady=3)
+        box_pointtype = ttk.Combobox(frame_peakdet, values=point_type)
+        box_pointtype.set("Active Channel")
+        box_pointtype.grid(row=1, column=1, sticky="sw", padx=(1, 5), pady=3)
+
+        label_thresh = ttk.Label(frame_peakdet, text="Threshold [0, 1]: ")
+        label_thresh.grid(row=2, column=0, sticky="nw", padx=(5, 1), pady=3)
+        entry_thresh = ttk.Entry(frame_peakdet, width=5)
+        entry_thresh.insert(0, "0.2")
+        entry_thresh.grid(row=2, column=1, sticky="ne", padx=(1, 5), pady=3)
+
+        label_dist = ttk.Label(frame_peakdet, text="Distance [0, inf): ")
+        label_dist.grid(row=3, column=0, sticky="w", padx=(5, 1), pady=3)
+        entry_dist = ttk.Entry(frame_peakdet, width=5)
+        entry_dist.insert(0, "0")
+        entry_dist.grid(row=3, column=1, sticky="e", padx=(1, 5), pady=3)
+
+        check_autodetect = ttk.Checkbutton(
+            frame_peakdet,
+            text="Automatically detect opposite",
+            variable=detect_opposite,
+            onvalue=True,
+            offvalue=False,
+        )
+        check_autodetect.grid(
+            row=4, column=0, columnspan=2, sticky="ew", padx=5, pady=3
+        )
+
+        button_runpointdet = ttk.Button(frame_peakdet, text="Run detection")
+        button_runpointdet.grid(row=5, column=0, columnspan=2, padx=5, pady=3)
 
         # Frame for peak editing
-        frame_editpeaks = ttk.LabelFrame(left_column, text="Edit Points")
-        frame_editpeaks.grid(row=2, column=0, sticky="ew", padx=3, pady=5)
+        frame_editpoints = ttk.LabelFrame(left_column, text="Edit Points")
+        frame_editpoints.grid(row=1, column=0, sticky="ew", padx=3, pady=5)
 
-        radio_delpeaks = ttk.Radiobutton(
-            frame_editpeaks, text="Delete peaks", variable=interaction, value=1
+        radio_delpoints = ttk.Radiobutton(
+            frame_editpoints, text="Delete points", variable=interaction, value=1
         )
-        radio_delpeaks.pack(anchor="w", padx=5, pady=3)
-        radio_addpeaks = ttk.Radiobutton(
-            frame_editpeaks, text="Add single peak", variable=interaction, value=2
+        radio_delpoints.pack(anchor="w", padx=5, pady=3)
+        radio_addpoints = ttk.Radiobutton(
+            frame_editpoints, text="Add one point", variable=interaction, value=2
         )
-        radio_addpeaks.pack(anchor="w", padx=5, pady=3)
-        radio_detpeaks = ttk.Radiobutton(
-            frame_editpeaks,
-            text="Multi-peaks estimation",
+        radio_addpoints.pack(anchor="w", padx=5, pady=3)
+        radio_detpoints = ttk.Radiobutton(
+            frame_editpoints,
+            text="Multi-point estimation",
             variable=interaction,
             value=3,
         )
-        radio_detpeaks.pack(anchor="w", padx=5, pady=3)
-
-        radio_deltrous = ttk.Radiobutton(
-            frame_editpeaks, text="Delete troughs", variable=interaction, value=4
-        )
-        radio_deltrous.pack(anchor="w", padx=5, pady=3)
-        radio_addtrous = ttk.Radiobutton(
-            frame_editpeaks, text="Add single trough", variable=interaction, value=5
-        )
-        radio_addtrous.pack(anchor="w", padx=5, pady=3)
-        radio_dettrous = ttk.Radiobutton(
-            frame_editpeaks,
-            text="Multi-troughs estimation",
-            variable=interaction,
-            value=6,
-        )
-        radio_dettrous.pack(anchor="w", padx=5, pady=3)
+        radio_detpoints.pack(anchor="w", padx=5, pady=3)
 
         # Frame for realignment
         frame_movesignal = ttk.LabelFrame(left_column, text="Realign timeseries")
-        frame_movesignal.grid(row=3, column=0, sticky="ew", padx=3, pady=5)
+        frame_movesignal.grid(row=2, column=0, sticky="ew", padx=3, pady=5)
 
-        radio_rempeaks = ttk.Radiobutton(
-            frame_movesignal, text="Manual realignment", variable=interaction, value=7
+        radio_manualrealign = ttk.Radiobutton(
+            frame_movesignal, text="Manual realignment", variable=interaction, value=4
         )
-        radio_rempeaks.grid(row=0, column=0, columnspan=2, sticky="ew", padx=5, pady=3)
+        radio_manualrealign.grid(
+            row=0, column=0, columnspan=2, sticky="ew", padx=5, pady=3
+        )
 
         label_reference = ttk.Label(frame_movesignal, text="Reference: ")
         label_reference.grid(row=1, column=0, sticky="e", pady=3)
@@ -171,7 +168,7 @@ class Window:
 
         # Frame for plot interaction
         frame_plotinteraction = ttk.LabelFrame(left_column, text="Plot interaction")
-        frame_plotinteraction.grid(row=4, column=0, sticky="ew", padx=3, pady=5)
+        frame_plotinteraction.grid(row=3, column=0, sticky="ew", padx=3, pady=5)
 
         # radio_scroll = ttk.Radiobutton(
         #     frame_plotinteraction, text="Scroll", variable=interaction, value=8
@@ -184,19 +181,21 @@ class Window:
 
         # Frame for artefact marking (what was peak "rejection")
         frame_markartefact = ttk.LabelFrame(left_column, text="Artefacts")
-        frame_markartefact.grid(row=5, column=0, sticky="ew", padx=3, pady=5)
+        frame_markartefact.grid(row=4, column=0, sticky="ew", padx=3, pady=5)
 
-        radio_rempeaks = ttk.Radiobutton(
-            frame_markartefact, text="Mark Artefact", variable=interaction, value=10
+        radio_markartefact = ttk.Radiobutton(
+            frame_markartefact, text="Mark Artefact", variable=interaction, value=5
         )
-        radio_rempeaks.pack(anchor="w", padx=5, pady=3)
+        radio_markartefact.pack(anchor="w", padx=5, pady=3)
 
         label_QA = ttk.Label(frame_markartefact, text="Annotations")
         label_QA.pack(padx=5, pady=(3, 1))
-        text_QA = tk.Text(frame_markartefact, height=10, width=50)
+        text_QA = tk.Text(frame_markartefact, height=10, width=30)
         text_QA.pack(expand=True, fill=tk.BOTH)
         button_annotate = ttk.Button(frame_markartefact, text="Annotate")
         button_annotate.pack(padx=5, pady=3)
+
+        # ######################## Right Frame ######################## #
 
         # ## Plots!
         right_column = ttk.Frame(master)
